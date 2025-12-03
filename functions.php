@@ -1,273 +1,170 @@
 <?php
 /**
- * Theme functions and definitions
+ * Twenty Twenty-Five functions and definitions.
  *
- * @package HelloElementor
+ * @link https://developer.wordpress.org/themes/basics/theme-functions/
+ *
+ * @package WordPress
+ * @subpackage Twenty_Twenty_Five
+ * @since Twenty Twenty-Five 1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
-
-define( 'HELLO_ELEMENTOR_VERSION', '3.4.5' );
-define( 'EHP_THEME_SLUG', 'hello-elementor' );
-
-define( 'HELLO_THEME_PATH', get_template_directory() );
-define( 'HELLO_THEME_URL', get_template_directory_uri() );
-define( 'HELLO_THEME_ASSETS_PATH', HELLO_THEME_PATH . '/assets/' );
-define( 'HELLO_THEME_ASSETS_URL', HELLO_THEME_URL . '/assets/' );
-define( 'HELLO_THEME_SCRIPTS_PATH', HELLO_THEME_ASSETS_PATH . 'js/' );
-define( 'HELLO_THEME_SCRIPTS_URL', HELLO_THEME_ASSETS_URL . 'js/' );
-define( 'HELLO_THEME_STYLE_PATH', HELLO_THEME_ASSETS_PATH . 'css/' );
-define( 'HELLO_THEME_STYLE_URL', HELLO_THEME_ASSETS_URL . 'css/' );
-define( 'HELLO_THEME_IMAGES_PATH', HELLO_THEME_ASSETS_PATH . 'images/' );
-define( 'HELLO_THEME_IMAGES_URL', HELLO_THEME_ASSETS_URL . 'images/' );
-
-if ( ! isset( $content_width ) ) {
-	$content_width = 800; // Pixels.
-}
-
-if ( ! function_exists( 'hello_elementor_setup' ) ) {
+// Adds theme support for post formats.
+if ( ! function_exists( 'twentytwentyfive_post_format_setup' ) ) :
 	/**
-	 * Set up theme support.
+	 * Adds theme support for post formats.
+	 *
+	 * @since Twenty Twenty-Five 1.0
 	 *
 	 * @return void
 	 */
-	function hello_elementor_setup() {
-		if ( is_admin() ) {
-			hello_maybe_update_theme_version_in_db();
-		}
-
-		if ( apply_filters( 'hello_elementor_register_menus', true ) ) {
-			register_nav_menus( [ 'menu-1' => esc_html__( 'Header', 'hello-elementor' ) ] );
-			register_nav_menus( [ 'menu-2' => esc_html__( 'Footer', 'hello-elementor' ) ] );
-		}
-
-		if ( apply_filters( 'hello_elementor_post_type_support', true ) ) {
-			add_post_type_support( 'page', 'excerpt' );
-		}
-
-		if ( apply_filters( 'hello_elementor_add_theme_support', true ) ) {
-			add_theme_support( 'post-thumbnails' );
-			add_theme_support( 'automatic-feed-links' );
-			add_theme_support( 'title-tag' );
-			add_theme_support(
-				'html5',
-				[
-					'search-form',
-					'comment-form',
-					'comment-list',
-					'gallery',
-					'caption',
-					'script',
-					'style',
-					'navigation-widgets',
-				]
-			);
-			add_theme_support(
-				'custom-logo',
-				[
-					'height'      => 100,
-					'width'       => 350,
-					'flex-height' => true,
-					'flex-width'  => true,
-				]
-			);
-			add_theme_support( 'align-wide' );
-			add_theme_support( 'responsive-embeds' );
-
-			/*
-			 * Editor Styles
-			 */
-			add_theme_support( 'editor-styles' );
-			add_editor_style( 'assets/css/editor-styles.css' );
-
-			/*
-			 * WooCommerce.
-			 */
-			if ( apply_filters( 'hello_elementor_add_woocommerce_support', true ) ) {
-				// WooCommerce in general.
-				add_theme_support( 'woocommerce' );
-				// Enabling WooCommerce product gallery features (are off by default since WC 3.0.0).
-				// zoom.
-				add_theme_support( 'wc-product-gallery-zoom' );
-				// lightbox.
-				add_theme_support( 'wc-product-gallery-lightbox' );
-				// swipe.
-				add_theme_support( 'wc-product-gallery-slider' );
-			}
-		}
+	function twentytwentyfive_post_format_setup() {
+		add_theme_support( 'post-formats', array( 'aside', 'audio', 'chat', 'gallery', 'image', 'link', 'quote', 'status', 'video' ) );
 	}
-}
-add_action( 'after_setup_theme', 'hello_elementor_setup' );
+endif;
+add_action( 'after_setup_theme', 'twentytwentyfive_post_format_setup' );
 
-function hello_maybe_update_theme_version_in_db() {
-	$theme_version_option_name = 'hello_theme_version';
-	// The theme version saved in the database.
-	$hello_theme_db_version = get_option( $theme_version_option_name );
-
-	// If the 'hello_theme_version' option does not exist in the DB, or the version needs to be updated, do the update.
-	if ( ! $hello_theme_db_version || version_compare( $hello_theme_db_version, HELLO_ELEMENTOR_VERSION, '<' ) ) {
-		update_option( $theme_version_option_name, HELLO_ELEMENTOR_VERSION );
-	}
-}
-
-if ( ! function_exists( 'hello_elementor_display_header_footer' ) ) {
+// Enqueues editor-style.css in the editors.
+if ( ! function_exists( 'twentytwentyfive_editor_style' ) ) :
 	/**
-	 * Check whether to display header footer.
+	 * Enqueues editor-style.css in the editors.
 	 *
-	 * @return bool
-	 */
-	function hello_elementor_display_header_footer() {
-		$hello_elementor_header_footer = true;
-
-		return apply_filters( 'hello_elementor_header_footer', $hello_elementor_header_footer );
-	}
-}
-
-if ( ! function_exists( 'hello_elementor_scripts_styles' ) ) {
-	/**
-	 * Theme Scripts & Styles.
+	 * @since Twenty Twenty-Five 1.0
 	 *
 	 * @return void
 	 */
-	function hello_elementor_scripts_styles() {
-		if ( apply_filters( 'hello_elementor_enqueue_style', true ) ) {
-			wp_enqueue_style(
-				'hello-elementor',
-				HELLO_THEME_STYLE_URL . 'reset.css',
-				[],
-				HELLO_ELEMENTOR_VERSION
-			);
-		}
-
-		if ( apply_filters( 'hello_elementor_enqueue_theme_style', true ) ) {
-			wp_enqueue_style(
-				'hello-elementor-theme-style',
-				HELLO_THEME_STYLE_URL . 'theme.css',
-				[],
-				HELLO_ELEMENTOR_VERSION
-			);
-		}
-
-		if ( hello_elementor_display_header_footer() ) {
-			wp_enqueue_style(
-				'hello-elementor-header-footer',
-				HELLO_THEME_STYLE_URL . 'header-footer.css',
-				[],
-				HELLO_ELEMENTOR_VERSION
-			);
-		}
+	function twentytwentyfive_editor_style() {
+		add_editor_style( 'assets/css/editor-style.css' );
 	}
-}
-add_action( 'wp_enqueue_scripts', 'hello_elementor_scripts_styles' );
+endif;
+add_action( 'after_setup_theme', 'twentytwentyfive_editor_style' );
 
-if ( ! function_exists( 'hello_elementor_register_elementor_locations' ) ) {
+// Enqueues style.css on the front.
+if ( ! function_exists( 'twentytwentyfive_enqueue_styles' ) ) :
 	/**
-	 * Register Elementor Locations.
+	 * Enqueues style.css on the front.
 	 *
-	 * @param ElementorPro\Modules\ThemeBuilder\Classes\Locations_Manager $elementor_theme_manager theme manager.
+	 * @since Twenty Twenty-Five 1.0
 	 *
 	 * @return void
 	 */
-	function hello_elementor_register_elementor_locations( $elementor_theme_manager ) {
-		if ( apply_filters( 'hello_elementor_register_elementor_locations', true ) ) {
-			$elementor_theme_manager->register_all_core_location();
-		}
+	function twentytwentyfive_enqueue_styles() {
+		wp_enqueue_style(
+			'twentytwentyfive-style',
+			get_parent_theme_file_uri( 'style.css' ),
+			array(),
+			wp_get_theme()->get( 'Version' )
+		);
 	}
-}
-add_action( 'elementor/theme/register_locations', 'hello_elementor_register_elementor_locations' );
+endif;
+add_action( 'wp_enqueue_scripts', 'twentytwentyfive_enqueue_styles' );
 
-if ( ! function_exists( 'hello_elementor_content_width' ) ) {
+// Registers custom block styles.
+if ( ! function_exists( 'twentytwentyfive_block_styles' ) ) :
 	/**
-	 * Set default content width.
+	 * Registers custom block styles.
+	 *
+	 * @since Twenty Twenty-Five 1.0
 	 *
 	 * @return void
 	 */
-	function hello_elementor_content_width() {
-		$GLOBALS['content_width'] = apply_filters( 'hello_elementor_content_width', 800 );
-	}
-}
-add_action( 'after_setup_theme', 'hello_elementor_content_width', 0 );
+	function twentytwentyfive_block_styles() {
+		register_block_style(
+			'core/list',
+			array(
+				'name'         => 'checkmark-list',
+				'label'        => __( 'Checkmark', 'twentytwentyfive' ),
+				'inline_style' => '
+				ul.is-style-checkmark-list {
+					list-style-type: "\2713";
+				}
 
-if ( ! function_exists( 'hello_elementor_add_description_meta_tag' ) ) {
+				ul.is-style-checkmark-list li {
+					padding-inline-start: 1ch;
+				}',
+			)
+		);
+	}
+endif;
+add_action( 'init', 'twentytwentyfive_block_styles' );
+
+// Registers pattern categories.
+if ( ! function_exists( 'twentytwentyfive_pattern_categories' ) ) :
 	/**
-	 * Add description meta tag with excerpt text.
+	 * Registers pattern categories.
+	 *
+	 * @since Twenty Twenty-Five 1.0
 	 *
 	 * @return void
 	 */
-	function hello_elementor_add_description_meta_tag() {
-		if ( ! apply_filters( 'hello_elementor_description_meta_tag', true ) ) {
-			return;
-		}
+	function twentytwentyfive_pattern_categories() {
 
-		if ( ! is_singular() ) {
-			return;
-		}
+		register_block_pattern_category(
+			'twentytwentyfive_page',
+			array(
+				'label'       => __( 'Pages', 'twentytwentyfive' ),
+				'description' => __( 'A collection of full page layouts.', 'twentytwentyfive' ),
+			)
+		);
 
-		$post = get_queried_object();
-		if ( empty( $post->post_excerpt ) ) {
-			return;
-		}
-
-		echo '<meta name="description" content="' . esc_attr( wp_strip_all_tags( $post->post_excerpt ) ) . '">' . "\n";
+		register_block_pattern_category(
+			'twentytwentyfive_post-format',
+			array(
+				'label'       => __( 'Post formats', 'twentytwentyfive' ),
+				'description' => __( 'A collection of post format patterns.', 'twentytwentyfive' ),
+			)
+		);
 	}
-}
-add_action( 'wp_head', 'hello_elementor_add_description_meta_tag' );
+endif;
+add_action( 'init', 'twentytwentyfive_pattern_categories' );
 
-// Settings page
-require get_template_directory() . '/includes/settings-functions.php';
-
-// Header & footer styling option, inside Elementor
-require get_template_directory() . '/includes/elementor-functions.php';
-
-if ( ! function_exists( 'hello_elementor_customizer' ) ) {
-	// Customizer controls
-	function hello_elementor_customizer() {
-		if ( ! is_customize_preview() ) {
-			return;
-		}
-
-		if ( ! hello_elementor_display_header_footer() ) {
-			return;
-		}
-
-		require get_template_directory() . '/includes/customizer-functions.php';
-	}
-}
-add_action( 'init', 'hello_elementor_customizer' );
-
-if ( ! function_exists( 'hello_elementor_check_hide_title' ) ) {
+// Registers block binding sources.
+if ( ! function_exists( 'twentytwentyfive_register_block_bindings' ) ) :
 	/**
-	 * Check whether to display the page title.
+	 * Registers the post format block binding source.
 	 *
-	 * @param bool $val default value.
+	 * @since Twenty Twenty-Five 1.0
 	 *
-	 * @return bool
+	 * @return void
 	 */
-	function hello_elementor_check_hide_title( $val ) {
-		if ( defined( 'ELEMENTOR_VERSION' ) ) {
-			$current_doc = Elementor\Plugin::instance()->documents->get( get_the_ID() );
-			if ( $current_doc && 'yes' === $current_doc->get_settings( 'hide_title' ) ) {
-				$val = false;
-			}
+	function twentytwentyfive_register_block_bindings() {
+		register_block_bindings_source(
+			'twentytwentyfive/format',
+			array(
+				'label'              => _x( 'Post format name', 'Label for the block binding placeholder in the editor', 'twentytwentyfive' ),
+				'get_value_callback' => 'twentytwentyfive_format_binding',
+			)
+		);
+	}
+endif;
+add_action( 'init', 'twentytwentyfive_register_block_bindings' );
+
+// Registers block binding callback function for the post format name.
+if ( ! function_exists( 'twentytwentyfive_format_binding' ) ) :
+	/**
+	 * Callback function for the post format name block binding source.
+	 *
+	 * @since Twenty Twenty-Five 1.0
+	 *
+	 * @return string|void Post format name, or nothing if the format is 'standard'.
+	 */
+	function twentytwentyfive_format_binding() {
+		$post_format_slug = get_post_format();
+
+		if ( $post_format_slug && 'standard' !== $post_format_slug ) {
+			return get_post_format_string( $post_format_slug );
 		}
-		return $val;
 	}
+endif;
+
+function enqueue_rive() {
+    wp_enqueue_script(
+        'rive-canvas',
+        'https://unpkg.com/@rive-app/canvas@2.5.3',
+        [],
+        null,
+        true
+    );
 }
-add_filter( 'hello_elementor_page_title', 'hello_elementor_check_hide_title' );
+add_action('wp_enqueue_scripts', 'enqueue_rive');
 
-/**
- * BC:
- * In v2.7.0 the theme removed the `hello_elementor_body_open()` from `header.php` replacing it with `wp_body_open()`.
- * The following code prevents fatal errors in child themes that still use this function.
- */
-if ( ! function_exists( 'hello_elementor_body_open' ) ) {
-	function hello_elementor_body_open() {
-		wp_body_open();
-	}
-}
-
-require HELLO_THEME_PATH . '/theme.php';
-
-HelloTheme\Theme::instance();
