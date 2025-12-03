@@ -237,17 +237,6 @@ if ( ! function_exists( 'hello_elementor_customizer' ) ) {
 }
 add_action( 'init', 'hello_elementor_customizer' );
 
-/* Project Item Data ACF */
-
-add_action('init', function() {
-    register_post_type('project_item', [
-        'label' => 'Project Items',
-        'public' => true,
-        'supports' => ['title', 'editor', 'thumbnail'],
-        'show_in_rest' => true
-    ]);
-});
-
 if ( ! function_exists( 'hello_elementor_check_hide_title' ) ) {
 	/**
 	 * Check whether to display the page title.
